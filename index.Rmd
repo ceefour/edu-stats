@@ -14,6 +14,7 @@ output:
 ```{r eval=FALSE}
 install.packages('dplyr')
 install.packages('ggplot2')
+install.packages('scales')
 ```
 
 ## Analysis
@@ -22,6 +23,7 @@ install.packages('ggplot2')
 library(dplyr)
 library(pander)
 library(ggplot2)
+library(scales)
 ```
 
 ```{r}
@@ -32,18 +34,23 @@ un_smp <- read.csv('un-smp-bandung-2015.csv', header = TRUE, stringsAsFactors = 
 un_smp <- subset(un_smp, !(un_smp$score %in% c('< 15')))
 un_smp$score <- as.double(un_smp$score)
 #typeof(un_smp$score)
-un_smp$cumFreq <- cumsum(un_smp$freq)
 #un_smp$score <- sapply(un_smp$score, as.numeric)
 #data.frame(un_smp, score = as.double(un_smp$score), freq = un_smp$freq,
 #           typ=typeof(un_smp$score))
 #un_smp[rep()]
 
+un_smp$cumFreq <- cumsum(un_smp$freq)
 un_factor <- c()
 for (rn in rownames(un_smp)) {
   #print(typeof(un_smp[rn, 'score']))
-  un_factor <- c(un_factor, rep(as.double(un_smp[rn, 'score']), un_smp[rn, 'freq']))
+  un_factor <- c(un_factor, rep(un_smp[rn, 'score'], un_smp[rn, 'freq']))
+  #count(un_factor)
+  #un_smp[rn, 'topPercent'] <- un_smp[rn, 'cumFreq'] / count(un_factor)
 }
 un_factor <- data.frame(score = un_factor)
+
+studentCount <- as.numeric(count(un_factor))
+un_smp$topPercent <- percent(un_smp$cumFreq / studentCount)
 pander(summary(un_factor))
 
 #qplot(un_factor, geom='histogram')
