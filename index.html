@@ -81,6 +81,7 @@ install.packages(&#39;scales&#39;)</code></pre>
 <h2>Analysis</h2>
 <p>Data source: <a href="http://disdikkota.bandung.go.id/webtemp/index.php/informasi/111-statisik-capaian-nun-smp-kota-bandung-2015?tmpl=component&amp;print=1&amp;page" class="uri">http://disdikkota.bandung.go.id/webtemp/index.php/informasi/111-statisik-capaian-nun-smp-kota-bandung-2015?tmpl=component&amp;print=1&amp;page</a>=</p>
 <pre class="r"><code>library(dplyr)
+library(plyr)
 library(pander)
 library(ggplot2)
 library(scales)</code></pre>
@@ -96,18 +97,27 @@ un_smp$score &lt;- as.double(un_smp$score)
 #           typ=typeof(un_smp$score))
 #un_smp[rep()]
 
+studentCount &lt;- sum(un_smp$freq)
+un_smp_one &lt;- data.frame(score=floor(un_smp$score), freq=un_smp$freq)
+un_smp_one &lt;- ddply(un_smp_one, ~score, summarise, freq=sum(freq))
+un_smp_one &lt;- un_smp_one %&gt;% arrange(-row_number(score))
 un_smp$cumFreq &lt;- cumsum(un_smp$freq)
+un_smp$topPercent &lt;- percent(un_smp$cumFreq / studentCount)
+un_smp_one$cumFreq &lt;- cumsum(un_smp_one$freq)
+un_smp_one$topPercent &lt;- percent(un_smp_one$cumFreq / studentCount)
+
 un_factor &lt;- c()
+un_factor_one &lt;- c()
 for (rn in rownames(un_smp)) {
   #print(typeof(un_smp[rn, &#39;score&#39;]))
   un_factor &lt;- c(un_factor, rep(un_smp[rn, &#39;score&#39;], un_smp[rn, &#39;freq&#39;]))
+  un_factor_one &lt;- c(un_factor_one, rep(floor(un_smp[rn, &#39;score&#39;]), un_smp[rn, &#39;freq&#39;]))
   #count(un_factor)
   #un_smp[rn, &#39;topPercent&#39;] &lt;- un_smp[rn, &#39;cumFreq&#39;] / count(un_factor)
 }
 un_factor &lt;- data.frame(score = un_factor)
+un_factor_one &lt;- data.frame(score = un_factor_one)
 
-studentCount &lt;- as.numeric(count(un_factor))
-un_smp$topPercent &lt;- percent(un_smp$cumFreq / studentCount)
 pander(summary(un_factor))</code></pre>
 <table>
 <colgroup>
@@ -141,14 +151,193 @@ pander(summary(un_factor))</code></pre>
 </table>
 <pre class="r"><code>#qplot(un_factor, geom=&#39;histogram&#39;)
 ggplot(data=un_factor, aes(x=score)) + 
-  geom_histogram(breaks=seq(15, 40, by=1)) + 
-  ggtitle(&#39;Distribusi nilai UN SMP Bandung 2015&#39;)</code></pre>
+  scale_x_continuous(breaks=seq(15, 40, by=1)) +
+  geom_histogram(breaks=seq(15, 40, by=1), color=&quot;#000020&quot;, fill=&quot;darkblue&quot;) + 
+  #geom_density(color=&quot;#ff6666&quot;) +
+  geom_vline(aes(xintercept=mean(score, na.rm=T)),   # Ignore NA values for mean
+               color=&quot;red&quot;, linetype=&quot;dashed&quot;, size=1)</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>  ggtitle(&#39;Distribusi nilai UN SMP Bandung 2015&#39;)</code></pre>
+<pre><code>## $title
+## [1] &quot;Distribusi nilai UN SMP Bandung 2015&quot;
+## 
+## attr(,&quot;class&quot;)
+## [1] &quot;labels&quot;</code></pre>
 <pre class="r"><code>#hist(un_factor)
 
-pander(un_smp, caption = &#39;Distribusi nilai UN SMP Bandung 2015 (plus kumulatif)&#39;)</code></pre>
+pander(un_smp_one, caption = &#39;Distribusi sederhana nilai UN SMP Bandung 2015 (plus kumulatif)&#39;)</code></pre>
 <table>
-<caption>Distribusi nilai UN SMP Bandung 2015 (plus kumulatif)</caption>
+<caption>Distribusi sederhana nilai UN SMP Bandung 2015 (plus kumulatif)</caption>
+<colgroup>
+<col width="11%" />
+<col width="9%" />
+<col width="13%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">score</th>
+<th align="center">freq</th>
+<th align="center">cumFreq</th>
+<th align="center">topPercent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">39</td>
+<td align="center">17</td>
+<td align="center">17</td>
+<td align="center">0.0%</td>
+</tr>
+<tr class="even">
+<td align="center">38</td>
+<td align="center">236</td>
+<td align="center">253</td>
+<td align="center">0.6%</td>
+</tr>
+<tr class="odd">
+<td align="center">37</td>
+<td align="center">667</td>
+<td align="center">920</td>
+<td align="center">2.3%</td>
+</tr>
+<tr class="even">
+<td align="center">36</td>
+<td align="center">884</td>
+<td align="center">1804</td>
+<td align="center">4.6%</td>
+</tr>
+<tr class="odd">
+<td align="center">35</td>
+<td align="center">925</td>
+<td align="center">2729</td>
+<td align="center">6.9%</td>
+</tr>
+<tr class="even">
+<td align="center">34</td>
+<td align="center">1093</td>
+<td align="center">3822</td>
+<td align="center">9.7%</td>
+</tr>
+<tr class="odd">
+<td align="center">33</td>
+<td align="center">1119</td>
+<td align="center">4941</td>
+<td align="center">12.5%</td>
+</tr>
+<tr class="even">
+<td align="center">32</td>
+<td align="center">1156</td>
+<td align="center">6097</td>
+<td align="center">15.5%</td>
+</tr>
+<tr class="odd">
+<td align="center">31</td>
+<td align="center">1220</td>
+<td align="center">7317</td>
+<td align="center">18.6%</td>
+</tr>
+<tr class="even">
+<td align="center">30</td>
+<td align="center">1399</td>
+<td align="center">8716</td>
+<td align="center">22.1%</td>
+</tr>
+<tr class="odd">
+<td align="center">29</td>
+<td align="center">1598</td>
+<td align="center">10314</td>
+<td align="center">26.2%</td>
+</tr>
+<tr class="even">
+<td align="center">28</td>
+<td align="center">1800</td>
+<td align="center">12114</td>
+<td align="center">30.7%</td>
+</tr>
+<tr class="odd">
+<td align="center">27</td>
+<td align="center">2011</td>
+<td align="center">14125</td>
+<td align="center">35.8%</td>
+</tr>
+<tr class="even">
+<td align="center">26</td>
+<td align="center">2206</td>
+<td align="center">16331</td>
+<td align="center">41.4%</td>
+</tr>
+<tr class="odd">
+<td align="center">25</td>
+<td align="center">2177</td>
+<td align="center">18508</td>
+<td align="center">46.9%</td>
+</tr>
+<tr class="even">
+<td align="center">24</td>
+<td align="center">2256</td>
+<td align="center">20764</td>
+<td align="center">52.7%</td>
+</tr>
+<tr class="odd">
+<td align="center">23</td>
+<td align="center">2300</td>
+<td align="center">23064</td>
+<td align="center">58.5%</td>
+</tr>
+<tr class="even">
+<td align="center">22</td>
+<td align="center">2479</td>
+<td align="center">25543</td>
+<td align="center">64.8%</td>
+</tr>
+<tr class="odd">
+<td align="center">21</td>
+<td align="center">2531</td>
+<td align="center">28074</td>
+<td align="center">71.2%</td>
+</tr>
+<tr class="even">
+<td align="center">20</td>
+<td align="center">2340</td>
+<td align="center">30414</td>
+<td align="center">77.1%</td>
+</tr>
+<tr class="odd">
+<td align="center">19</td>
+<td align="center">2250</td>
+<td align="center">32664</td>
+<td align="center">82.8%</td>
+</tr>
+<tr class="even">
+<td align="center">18</td>
+<td align="center">2169</td>
+<td align="center">34833</td>
+<td align="center">88.3%</td>
+</tr>
+<tr class="odd">
+<td align="center">17</td>
+<td align="center">1901</td>
+<td align="center">36734</td>
+<td align="center">93.2%</td>
+</tr>
+<tr class="even">
+<td align="center">16</td>
+<td align="center">1572</td>
+<td align="center">38306</td>
+<td align="center">97.2%</td>
+</tr>
+<tr class="odd">
+<td align="center">15</td>
+<td align="center">1121</td>
+<td align="center">39427</td>
+<td align="center">100.0%</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>pander(un_smp, caption = &#39;Distribusi detail nilai UN SMP Bandung 2015 (plus kumulatif)&#39;)</code></pre>
+<table>
+<caption>Distribusi detail nilai UN SMP Bandung 2015 (plus kumulatif)</caption>
 <colgroup>
 <col width="11%" />
 <col width="9%" />

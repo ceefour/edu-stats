@@ -23,6 +23,7 @@ Data source: http://disdikkota.bandung.go.id/webtemp/index.php/informasi/111-sta
 
 ```{r message=FALSE}
 library(dplyr)
+library(plyr)
 library(pander)
 library(ggplot2)
 library(scales)
@@ -41,25 +42,39 @@ un_smp$score <- as.double(un_smp$score)
 #           typ=typeof(un_smp$score))
 #un_smp[rep()]
 
+studentCount <- sum(un_smp$freq)
+un_smp_one <- data.frame(score=floor(un_smp$score), freq=un_smp$freq)
+un_smp_one <- ddply(un_smp_one, ~score, summarise, freq=sum(freq))
+un_smp_one <- un_smp_one %>% arrange(-row_number(score))
 un_smp$cumFreq <- cumsum(un_smp$freq)
+un_smp$topPercent <- percent(un_smp$cumFreq / studentCount)
+un_smp_one$cumFreq <- cumsum(un_smp_one$freq)
+un_smp_one$topPercent <- percent(un_smp_one$cumFreq / studentCount)
+
 un_factor <- c()
+un_factor_one <- c()
 for (rn in rownames(un_smp)) {
   #print(typeof(un_smp[rn, 'score']))
   un_factor <- c(un_factor, rep(un_smp[rn, 'score'], un_smp[rn, 'freq']))
+  un_factor_one <- c(un_factor_one, rep(floor(un_smp[rn, 'score']), un_smp[rn, 'freq']))
   #count(un_factor)
   #un_smp[rn, 'topPercent'] <- un_smp[rn, 'cumFreq'] / count(un_factor)
 }
 un_factor <- data.frame(score = un_factor)
+un_factor_one <- data.frame(score = un_factor_one)
 
-studentCount <- as.numeric(count(un_factor))
-un_smp$topPercent <- percent(un_smp$cumFreq / studentCount)
 pander(summary(un_factor))
 
 #qplot(un_factor, geom='histogram')
 ggplot(data=un_factor, aes(x=score)) + 
-  geom_histogram(breaks=seq(15, 40, by=1)) + 
+  scale_x_continuous(breaks=seq(15, 40, by=1)) +
+  geom_histogram(breaks=seq(15, 40, by=1), color="#000020", fill="darkblue") + 
+  #geom_density(color="#ff6666") +
+  geom_vline(aes(xintercept=mean(score, na.rm=T)),   # Ignore NA values for mean
+               color="red", linetype="dashed", size=1)
   ggtitle('Distribusi nilai UN SMP Bandung 2015')
 #hist(un_factor)
 
-pander(un_smp, caption = 'Distribusi nilai UN SMP Bandung 2015 (plus kumulatif)')
+pander(un_smp_one, caption = 'Distribusi sederhana nilai UN SMP Bandung 2015 (plus kumulatif)')
+pander(un_smp, caption = 'Distribusi detail nilai UN SMP Bandung 2015 (plus kumulatif)')
 ```
