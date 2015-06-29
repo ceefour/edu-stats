@@ -1,0 +1,56 @@
+---
+title: "Analisa data statistik pendidikan dasar SD/SMP/SMA/SMK di Indonesia dengan bahasa pemrograman R"
+author: "Hendy Irawan"
+date: "June 29, 2015"
+output:
+  html_document:
+    self_contained: no
+---
+
+**(Statistical data analysis of Indonesian basic education with R programming language)**
+
+## Requirements
+
+```{r eval=FALSE}
+install.packages('dplyr')
+install.packages('ggplot2')
+```
+
+## Analysis
+
+```{r message=FALSE}
+library(dplyr)
+library(pander)
+library(ggplot2)
+```
+
+```{r}
+#library(xlsx)
+#un_smp <- read.xlsx2('un-smp-bandung-2015.xlsx', 0)
+un_smp <- read.csv('un-smp-bandung-2015.csv', header = TRUE, stringsAsFactors = FALSE)
+#typeof(un_smp$score)
+un_smp <- subset(un_smp, !(un_smp$score %in% c('< 15')))
+un_smp$score <- as.double(un_smp$score)
+#typeof(un_smp$score)
+un_smp$cumFreq <- cumsum(un_smp$freq)
+#un_smp$score <- sapply(un_smp$score, as.numeric)
+#data.frame(un_smp, score = as.double(un_smp$score), freq = un_smp$freq,
+#           typ=typeof(un_smp$score))
+#un_smp[rep()]
+
+un_factor <- c()
+for (rn in rownames(un_smp)) {
+  #print(typeof(un_smp[rn, 'score']))
+  un_factor <- c(un_factor, rep(as.double(un_smp[rn, 'score']), un_smp[rn, 'freq']))
+}
+un_factor <- data.frame(score = un_factor)
+pander(summary(un_factor))
+
+#qplot(un_factor, geom='histogram')
+ggplot(data=un_factor, aes(x=score)) + 
+  geom_histogram(breaks=seq(15, 40, by=1)) + 
+  ggtitle('Distribusi nilai UN SMP Bandung 2015')
+#hist(un_factor)
+
+pander(un_smp, caption = 'Distribusi nilai UN SMP Bandung 2015 (plus kumulatif)')
+```

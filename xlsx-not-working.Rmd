@@ -1,0 +1,66 @@
+---
+title: "Analisa data statistik pendidikan dasar SD/SMP/SMA/SMK di Indonesia dengan bahasa pemrograman R"
+author: "Hendy Irawan"
+date: "June 29, 2015"
+output:
+  html_document:
+    self_contained: no
+---
+
+**(Statistical data analysis of Indonesian basic education with R programming language)**
+
+## Requirements
+
+```{r eval=FALSE}
+install.packages('dplyr')
+install.packages('ggplot2')
+```
+
+If you just install `xlsx`/`rJava` in Linux you'll get this error:
+
+```
+Error : .onLoad failed in loadNamespace() for 'rJava', details:
+  call: dyn.load(file, DLLpath = DLLpath, ...)
+  error: unable to load shared object '/home/ceefour/R/x86_64-unknown-linux-gnu-library/3.1/rJava/libs/rJava.so':
+  libjvm.so: cannot open shared object file: No such file or directory
+Error: loading failed
+```
+
+[For Linux(Ubuntu) users](http://stackoverflow.com/a/25932828/122441): If you have oracle-java (7/8) installed. It'll be at this location `/usr/lib/jvm` and sudo access is required.
+
+Create the file `/etc/ld.so.conf.d/java.conf` with the following entries:
+
+    /usr/lib/jvm/java-8-oracle/jre/lib/amd64
+    /usr/lib/jvm/java-8-oracle/jre/lib/amd64/server
+
+(Replace java-8-oracle with java-7-oracle depending on your java version)
+
+Then:
+
+    sudo ldconfig
+
+Restart RStudio and then install the `xslx/rJava` package.
+
+```{r eval=FALSE}
+install.packages('xlsx')
+```
+
+Unfortunately I still get error :( (probably due to http://stackoverflow.com/a/21424300/122441)
+
+```
+> un_smp <- read.xlsx('un-smp-bandung-2015.xlsx', 1)
+Error in .jcall("RJavaTools", "Ljava/lang/Object;", "invokeMethod", cl,  : 
+  org.apache.poi.POIXMLException: java.lang.reflect.InvocationTargetException
+> un_smp <- read.xlsx2('un-smp-bandung-2015.xlsx', 1)
+Error in .jcall("RJavaTools", "Ljava/lang/Object;", "invokeMethod", cl,  : 
+  org.apache.poi.POIXMLException: java.lang.reflect.InvocationTargetException
+```
+
+## Analysis
+
+```{r}
+library(dplyr)
+library(pander)
+library(xlsx)
+un_smp <- read.xlsx2('un-smp-bandung-2015.xlsx', 1)
+```
