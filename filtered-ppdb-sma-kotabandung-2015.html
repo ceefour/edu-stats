@@ -140,7 +140,7 @@ plot_pg &lt;- function(option_id, name) {
   df &lt;- fetch(rs, n=-1)
   df &lt;- df[!is.na(df$pg_dw),]
   plot &lt;- ggplot(df, aes(x=snapshottime, y=pg_dw)) +
-    scale_y_continuous(name=&#39;Nilai UN&#39;, limits=c(250, 400), breaks=seq(150, 400, by=10)) +
+    scale_y_continuous(name=&#39;Nilai UN&#39;, limits=c(190, 400), breaks=seq(150, 400, by=10)) +
     scale_x_datetime(name=&#39;hijau=dalam wilayah | biru=luar wilayah | merah=luar kota&#39;) +
     geom_errorbar(position=position_jitter(height=0), color=&#39;#00aa00&#39;,
                  aes(ymin=low_dw, ymax=high_dw)) +
