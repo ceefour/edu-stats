@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Hendy Irawan" />
+
+
+<title>Analisa distribusi hasil seleksi murid diterima PPDB SMA Kota Bandung 2015</title>
+
+<script src="filtered-ppdb-sma-kotabandung-2015_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="filtered-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+<script src="filtered-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+<script src="filtered-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/shim/html5shiv.min.js"></script>
+<script src="filtered-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="filtered-ppdb-sma-kotabandung-2015_files/highlight/default.css"
+      type="text/css" />
+<script src="filtered-ppdb-sma-kotabandung-2015_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img { 
+  max-width:100%; 
+  height: auto; 
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">Analisa distribusi hasil seleksi murid diterima PPDB SMA Kota Bandung 2015</h1>
+<h4 class="author"><em>Hendy Irawan</em></h4>
+<h4 class="date"><em>July 2, 2015</em></h4>
+</div>
+
+
+<div id="data-pendaftar-dan-hasil-seleksi-murid-diterima-ppdb-sma-kota-bandung-2015" class="section level2">
+<h2>Data Pendaftar dan Hasil Seleksi Murid Diterima PPDB SMA Kota Bandung 2015</h2>
+<p>Hendy’s note: <code>~/Dropbox/Hendy_Projects/soluvas-scrape/sample/ppdb</code></p>
+</div>
+<div id="requirements" class="section level2">
+<h2>Requirements</h2>
+<pre><code>sudo apt-get install libpq-dev</code></pre>
+<pre class="r"><code>install.packages(&#39;dplyr&#39;)
+install.packages(&#39;ggplot2&#39;)
+install.packages(&#39;scales&#39;)
+install.packages(&#39;RPostgreSQL&#39;)</code></pre>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<pre class="r"><code>library(dplyr)
+library(plyr)
+library(pander)
+library(ggplot2)
+library(scales)</code></pre>
+<pre class="r"><code>library(RPostgreSQL)
+con &lt;- dbConnect(dbDriver(&#39;PostgreSQL&#39;),
+                 host=&#39;localhost&#39;, user=&#39;postgres&#39;, password=&#39;bippo&#39;,
+                 dbname=&#39;scrape_scrape_dev&#39;)
+
+# Options:
+#choice_id yang relevan:
+#
+#* 615 = SMA Negeri 4 Akademik
+#* 685 = SMA Negeri 18 Akademik
+#* 680 = SMA Negeri 17 Akademik
+#* 620 = SMA Negeri 17 Akademik
+#* 600 = SMA Negeri 17 Akademik
+
+plot_pg &lt;- function(option_id, name) {
+  rs &lt;- dbSendQuery(con, paste(&quot;
+  -- SMA4, SMA18, SMA17, SMA6
+      SELECT option_id, snapshottime,
+        registeredforeignercount daftar_lk,
+        registeredforeignerdetailcount daftar_lw,
+        registeredinsidercount daftar_dw,
+        filteredforeignercount terima_lk,
+        filteredforeignerdetailcount terima_lw,
+        filteredinsidercount terima_dw,
+        CASE WHEN registeredforeignercount &gt; 0 THEN round(filteredforeignercount*100/registeredforeignercount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_lk,
+        CASE WHEN registeredforeignerdetailcount &gt; 0 THEN round(filteredforeignerdetailcount*100/registeredforeignerdetailcount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_lw,
+        CASE WHEN registeredinsidercount &gt; 0 THEN round(filteredinsidercount*100/registeredinsidercount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_dw,
+        round(filteredforeignerminscoretotal1::numeric, 1) pg_lk,
+        round(filteredforeignerdetailminscoretotal1::numeric, 1) pg_lw,
+        round(filteredinsiderminscoretotal1::numeric, 1) pg_dw,
+        round(filteredforeignermeanscoretotal1::numeric, 1) mean_lk,
+        round(filteredforeignerdetailmeanscoretotal1::numeric, 1) mean_lw,
+        round(filteredinsidermeanscoretotal1::numeric, 1) mean_dw,
+        round(filteredforeignerstddevscoretotal1::numeric, 1) stddev_lk,
+        round(filteredforeignerdetailstddevscoretotal1::numeric, 1) stddev_lw,
+        round(filteredinsiderstddevscoretotal1::numeric, 1) stddev_dw,
+        round(filteredforeignerlowscoretotal1::numeric, 1) low_lk,
+        round(filteredforeignerdetaillowscoretotal1::numeric, 1) low_lw,
+        round(filteredinsiderlowscoretotal1::numeric, 1) low_dw,
+        round(filteredforeignerhighscoretotal1::numeric, 1) high_lk,
+        round(filteredforeignerdetailhighscoretotal1::numeric, 1) high_lw,
+        round(filteredinsiderhighscoretotal1::numeric, 1) high_dw,
+        round(filteredforeignermaxscoretotal1::numeric, 1) max_lk,
+        round(filteredforeignerdetailmaxscoretotal1::numeric, 1) max_lw,
+        round(filteredinsidermaxscoretotal1::numeric, 1) max_dw
+      FROM ppdbbandung2015.optionapplicantsnapshot
+        WHERE option_id = &quot;, option_id, &quot;
+        ORDER BY option_id, snapshottime;
+  &quot;));
+  df &lt;- fetch(rs, n=-1)
+  df &lt;- df[!is.na(df$pg_dw),]
+  plot &lt;- ggplot(df, aes(x=snapshottime, y=pg_dw)) +
+    scale_y_continuous(name=&#39;Nilai UN&#39;, limits=c(250, 400), breaks=seq(150, 400, by=10)) +
+    scale_x_datetime(name=&#39;hijau=dalam wilayah | kuning=luar wilayah | merah=luar kota&#39;) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;green&#39;,
+                 aes(ymin=low_dw, ymax=high_dw)) +
+    geom_line(aes(y=pg_dw), color=&#39;green&#39;, size=1.5, alpha=0.5, position=position_jitter(height=1)) +
+    geom_line(aes(y=mean_dw), color=&#39;green&#39;, linetype=&#39;dashed&#39;) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;yellow&#39;,
+                 aes(ymin=low_lw, ymax=high_lw)) +
+    geom_line(aes(y=pg_lw), color=&#39;yellow&#39;, size=1.5, alpha=0.5, position=position_jitter(height=1)) +
+    geom_line(aes(y=mean_lw), color=&#39;yellow&#39;, linetype=&#39;dashed&#39;) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;red&#39;,
+                 aes(ymin=low_lk, ymax=high_lk)) +
+    geom_line(aes(y=pg_lk), color=&#39;red&#39;, size=1.5, alpha=0.5, position=position_jitter(height=1)) +
+    geom_line(aes(y=mean_lk), color=&#39;red&#39;, linetype=&#39;dashed&#39;) +
+    ggtitle(paste(&#39;Passing Grade Kewilayahan&#39;, name))
+  return(plot)
+}
+
+plot_pg(615, &#39;SMA Negeri 4 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>plot_pg(685, &#39;SMA Negeri 18 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-2.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>plot_pg(680, &#39;SMA Negeri 17 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-3.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>plot_pg(620, &#39;SMA Negeri 6 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-4.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>plot_pg(600, &#39;SMA Negeri 1 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-5.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>plot_pg(610, &#39;SMA Negeri 3 Bandung Akademik&#39;)</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-6.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>invisible(dbDisconnect(con))</code></pre>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

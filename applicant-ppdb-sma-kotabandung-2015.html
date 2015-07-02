@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="author" content="Hendy Irawan" />
+
+
+<title>Analisa data pendaftar dan hasil seleksi PPDB SMA Kota Bandung 2015</title>
+
+<script src="applicant-ppdb-sma-kotabandung-2015_files/jquery-1.11.0/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="applicant-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/css/bootstrap.min.css" rel="stylesheet" />
+<script src="applicant-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/js/bootstrap.min.js"></script>
+<script src="applicant-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/shim/html5shiv.min.js"></script>
+<script src="applicant-ppdb-sma-kotabandung-2015_files/bootstrap-3.3.1/shim/respond.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<link rel="stylesheet"
+      href="applicant-ppdb-sma-kotabandung-2015_files/highlight/default.css"
+      type="text/css" />
+<script src="applicant-ppdb-sma-kotabandung-2015_files/highlight/highlight.js"></script>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img { 
+  max-width:100%; 
+  height: auto; 
+}
+</style>
+<div class="container-fluid main-container">
+
+
+<div id="header">
+<h1 class="title">Analisa data pendaftar dan hasil seleksi PPDB SMA Kota Bandung 2015</h1>
+<h4 class="author"><em>Hendy Irawan</em></h4>
+<h4 class="date"><em>July 1, 2015</em></h4>
+</div>
+
+
+<div id="data-pendaftar-dan-hasil-seleksi-ppdb-sma-kota-bandung-2015" class="section level2">
+<h2>Data Pendaftar dan Hasil Seleksi PPDB SMA Kota Bandung 2015</h2>
+<p>Hendy’s note: <code>~/Dropbox/Hendy_Projects/soluvas-scrape/sample/ppdb</code></p>
+</div>
+<div id="requirements" class="section level2">
+<h2>Requirements</h2>
+<pre class="r"><code>install.packages(&#39;dplyr&#39;)
+install.packages(&#39;ggplot2&#39;)
+install.packages(&#39;scales&#39;)</code></pre>
+</div>
+<div id="analysis" class="section level2">
+<h2>Analysis</h2>
+<pre class="r"><code>library(dplyr)
+library(plyr)
+library(pander)
+library(ggplot2)
+library(scales)</code></pre>
+<pre class="r"><code>applicant &lt;- read.csv(&#39;/tmp/applicant.csv&#39;, header = TRUE, stringsAsFactors = FALSE)
+filtered &lt;- read.csv(&#39;/tmp/filteredapplicant.csv&#39;, header = TRUE, stringsAsFactors = FALSE)
+
+analyze_school &lt;- function(option_id, school_name) {
+  applicant_sel &lt;- applicant[applicant$option_id == option_id,]
+  obj1 &lt;- summary(applicant_sel$score_total1)
+#  obj1 &lt;- pander(summary(applicant_sel$score_total1),
+#         caption=paste(&#39;Sinopsis Pendaftar&#39;, school_name))
+  
+  filtered_sel &lt;- filtered[filtered$option_id == option_id,]
+  obj2 &lt;- summary(filtered_sel$score_total1)
+  #obj2 &lt;- summary(filtered_sel$score_total1)
+  
+  passing_grade &lt;- min(filtered_sel$score_total1)
+  
+  obj3 &lt;- ggplot(data=applicant_sel, aes(x=score_total1)) + 
+    scale_x_continuous(breaks=seq(250, 390, by=10)) +
+    geom_histogram(breaks=seq(250, 390, by=10), color=&quot;#000020&quot;, fill=&quot;darkblue&quot;) + 
+    #geom_density(color=&quot;#ff6666&quot;) +
+    geom_vline(aes(xintercept=mean(score_total1, na.rm=T)),   # Ignore NA values for mean
+                 color=&quot;green&quot;, linetype=&quot;dashed&quot;, size=1) +
+    geom_vline(xintercept=passing_grade,   # Ignore NA values for mean
+                 color=&quot;red&quot;, linetype=&quot;dashed&quot;, size=1) +
+    ggtitle(paste(&#39;Distribusi Nilai Pendaftar&#39;, school_name))
+  
+  obj4 &lt;- ggplot(data=filtered_sel, aes(x=score_total1)) + 
+    scale_x_continuous(breaks=seq(250, 390, by=10)) +
+    geom_histogram(breaks=seq(250, 390, by=10), color=&quot;#000020&quot;, fill=&quot;darkblue&quot;) + 
+    #geom_density(color=&quot;#ff6666&quot;) +
+    geom_vline(aes(xintercept=mean(score_total1, na.rm=T)),   # Ignore NA values for mean
+                 color=&quot;green&quot;, linetype=&quot;dashed&quot;, size=1) +
+    geom_vline(xintercept=passing_grade,   # Ignore NA values for mean
+                 color=&quot;red&quot;, linetype=&quot;dashed&quot;, size=1) +
+    ggtitle(paste(&#39;Distribusi Nilai Diterima&#39;, school_name))
+  
+  result &lt;- list(application_summary=obj1, filtered_summary=obj2, obj3, obj4)
+  return(result)
+}
+
+l &lt;- analyze_school(615, &#39;SMA Negeri 4 Bandung (Akademik)&#39;)
+l[[1]] # Pendaftar</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   25.75  263.50  296.50  293.60  330.20  376.50</code></pre>
+<pre class="r"><code>l[[2]] # Diterima</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   257.0   285.1   311.2   312.8   340.9   376.5</code></pre>
+<pre class="r"><code>l[[3]]</code></pre>
+<p><img src="applicant-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>l[[4]]</code></pre>
+<p><img src="applicant-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-2.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>l &lt;- analyze_school(685, &#39;SMA Negeri 18 Bandung (Akademik)&#39;)
+l[[1]] # Pendaftar</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   129.5   188.4   201.5   198.6   213.2   278.5</code></pre>
+<pre class="r"><code>l[[2]] # Diterima</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##   129.5   193.0   207.0   208.3   227.0   278.5</code></pre>
+<pre class="r"><code>l[[3]]</code></pre>
+<p><img src="applicant-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-3.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>l[[4]]</code></pre>
+<p><img src="applicant-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-4.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>#l &lt;- analyze_school(680, &#39;SMA Negeri 17 Bandung (Akademik)&#39;)
+#l[[1]] # Pendaftar
+#l[[2]] # Diterima
+#l[[3]]
+#l[[4]]</code></pre>
+</div>
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
