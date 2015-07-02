@@ -11,9 +11,10 @@ output:
 
 ## Daftar Analisa
 
-1. **[Analisa data statistik Hasil UN SMP Kota Bandung 2015](un-smp-bandung-2015.html)**
+1. **[Analisa distribusi hasil seleksi murid diterima PPDB SMA Kota Bandung 2015](filtered-ppdb-sma-kotabandung-2015.html)**
 2. **[Analisa data pendaftar dan hasil seleksi PPDB SMA Kota Bandung 2015](applicant-ppdb-sma-kotabandung-2015.html)**
-
+3. **[Analisa data statistik Hasil UN SMP Kota Bandung 2015](un-smp-bandung-2015.html)**
+ 
 ## Data Passing Grade PPDB SMA Kota Bandung 2014
 
 [passing-grade-ppdb-sma-kota-bandung-2014.ods](passing-grade-ppdb-sma-kota-bandung-2014.ods)
