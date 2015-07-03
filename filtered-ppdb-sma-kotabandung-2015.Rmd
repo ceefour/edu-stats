@@ -65,18 +65,18 @@ plot_pg <- function(option_id, name) {
         round(filteredforeignerminscoretotal1::numeric, 1) pg_lk,
         round(filteredforeignerdetailminscoretotal1::numeric, 1) pg_lw,
         round(filteredinsiderminscoretotal1::numeric, 1) pg_dw,
-        round(filteredforeignermeanscoretotal1::numeric, 1) mean_lk,
-        round(filteredforeignerdetailmeanscoretotal1::numeric, 1) mean_lw,
-        round(filteredinsidermeanscoretotal1::numeric, 1) mean_dw,
+        round(filteredforeignerq2scoretotal1::numeric, 1) median_lk,
+        round(filteredforeignerdetailq2scoretotal1::numeric, 1) median_lw,
+        round(filteredinsiderq2scoretotal1::numeric, 1) median_dw,
         round(filteredforeignerstddevscoretotal1::numeric, 1) stddev_lk,
         round(filteredforeignerdetailstddevscoretotal1::numeric, 1) stddev_lw,
         round(filteredinsiderstddevscoretotal1::numeric, 1) stddev_dw,
-        round(filteredforeignerlowscoretotal1::numeric, 1) low_lk,
-        round(filteredforeignerdetaillowscoretotal1::numeric, 1) low_lw,
-        round(filteredinsiderlowscoretotal1::numeric, 1) low_dw,
-        round(filteredforeignerhighscoretotal1::numeric, 1) high_lk,
-        round(filteredforeignerdetailhighscoretotal1::numeric, 1) high_lw,
-        round(filteredinsiderhighscoretotal1::numeric, 1) high_dw,
+        round(filteredforeignerq1scoretotal1::numeric, 1) low_lk,
+        round(filteredforeignerdetailq1scoretotal1::numeric, 1) low_lw,
+        round(filteredinsiderq1scoretotal1::numeric, 1) low_dw,
+        round(filteredforeignerq3scoretotal1::numeric, 1) high_lk,
+        round(filteredforeignerdetailq3scoretotal1::numeric, 1) high_lw,
+        round(filteredinsiderq3scoretotal1::numeric, 1) high_dw,
         round(filteredforeignermaxscoretotal1::numeric, 1) max_lk,
         round(filteredforeignerdetailmaxscoretotal1::numeric, 1) max_lw,
         round(filteredinsidermaxscoretotal1::numeric, 1) max_dw
@@ -92,15 +92,15 @@ plot_pg <- function(option_id, name) {
     geom_errorbar(position=position_jitter(height=0), color='#00aa00',
                  aes(ymin=low_dw, ymax=high_dw)) +
     geom_line(aes(y=pg_dw), color='#00aa00', size=1.5, alpha=0.7, position=position_jitter(height=1)) +
-    geom_line(aes(y=mean_dw), color='#00aa00', linetype='dashed') +
+    geom_line(aes(y=median_dw), color='#00aa00', linetype='dashed') +
     geom_errorbar(position=position_jitter(height=0), color='#1111ee',
                  aes(ymin=low_lw, ymax=high_lw)) +
     geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=mean_lw), color='#1111ee', linetype='dashed') +
+    geom_line(aes(y=median_lw), color='#1111ee', linetype='dashed') +
     geom_errorbar(position=position_jitter(height=0), color='red',
                  aes(ymin=low_lk, ymax=high_lk)) +
     geom_line(aes(y=pg_lk), color='red', size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=mean_lk), color='red', linetype='dashed') +
+    geom_line(aes(y=median_lk), color='red', linetype='dashed') +
     ggtitle(paste('Passing Grade Kewilayahan', name))
   return(plot)
 }
