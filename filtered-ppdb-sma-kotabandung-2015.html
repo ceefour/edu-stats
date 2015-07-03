@@ -182,6 +182,116 @@ plot_pg &lt;- function(option_id, name) {
 <li><strong>Error bar bawah:</strong> quartile 3 (top 75%)</li>
 </ol>
 <p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-7.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-8.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-9.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-10.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-11.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-12.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-13.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-14.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-15.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-16.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-17.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-18.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-19.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-20.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-21.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-22.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-23.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-24.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-25.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-26.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-27.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-28.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-29.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>filterstatuses &lt;- c(&#39;registered&#39;, &#39;filtered&#39;)
+areas &lt;- c(&#39;1-LK&#39;, &#39;2-DW&#39;, &#39;3-LW&#39;)
+plot_applicant &lt;- function(option_id, name) {
+  rs &lt;- dbSendQuery(con, paste(&quot;
+  -- SMA4, SMA18, SMA17, SMA6
+      SELECT option_id, snapshottime,
+        registeredforeignercount daftar_lk,
+        registeredforeignerdetailcount daftar_lw,
+        registeredinsidercount daftar_dw,
+        filteredforeignercount terima_lk,
+        filteredforeignerdetailcount terima_lw,
+        filteredinsidercount terima_dw,
+        CASE WHEN registeredforeignercount &gt; 0 THEN round(filteredforeignercount*100/registeredforeignercount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_lk,
+        CASE WHEN registeredforeignerdetailcount &gt; 0 THEN round(filteredforeignerdetailcount*100/registeredforeignerdetailcount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_lw,
+        CASE WHEN registeredinsidercount &gt; 0 THEN round(filteredinsidercount*100/registeredinsidercount) || &#39;%&#39; ELSE &#39;&#39; END rasio_terima_dw
+      FROM ppdbbandung2015.optionapplicantsnapshot
+        WHERE option_id = &quot;, option_id, &quot;
+        ORDER BY option_id, snapshottime;
+  &quot;));
+  df &lt;- fetch(rs, n=-1)
+  orig_nrows = nrow(df)
+  df &lt;- df[rep(row.names(df), 3),]
+  df$area &lt;- areas[floor(0:(nrow(df)-1) / orig_nrows) + 1]
+  #df$filterstatus &lt;- filterstatuses[floor(0:(nrow(df)-1) / 3) %% 2 + 1]
+  #df$area &lt;- as.factor(df$area)
+  #df$filterstatus &lt;- as.factor(df$filterstatus)
+  df$filteredcount &lt;- 0
+  df$registeredcount &lt;- 0
+  for (i in 1:nrow(df)) {
+    if (df[i,][[&#39;area&#39;]] == &#39;1-LK&#39;) {
+      df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_lk
+      df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_lk
+    } else if (df[i,][[&#39;area&#39;]] == &#39;3-LW&#39;) {
+      df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_lw
+      df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_lw
+    } else if (df[i,][[&#39;area&#39;]] == &#39;2-DW&#39;) {
+      df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_dw
+      df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_dw
+    }
+  }
+  #df &lt;- df[c(&#39;snapshottime&#39;, &#39;studentcount&#39;, &#39;area&#39;)]
+  #df &lt;- df[with(df, order(area, filterstatus, snapshottime)),]
+  plot &lt;- ggplot(df, aes(x=snapshottime, y=filteredcount, fill=area, group=area)) +
+    scale_y_continuous(name=&#39;Jumlah Pendaftar/Diterima&#39;) +
+    scale_x_datetime(name=&#39;hijau=dalam wilayah | biru=luar wilayah | merah=luar kota&#39;) +
+    geom_area(aes(y=filteredcount), position=&#39;stack&#39;, alpha=0.5) +
+    geom_line(aes(y=registeredcount, color=area), size=2, position=&#39;stack&#39;) +
+    ggtitle(paste(&#39;Jumlah Pendaftar vs Diterima Kewilayahan&#39;, name))
+  plot
+  return(plot)
+}</code></pre>
+<p>Grafik Pendaftar vs Diterima:</p>
+<ul>
+<li>Garis tebal adalah jumlah pendaftar (pilihan 1) sesuai kewilayahan</li>
+<li>Area adalah jumlah diterima sesuai kewilayahan. Ini bisa lebih besar dari jumlah pendaftar apabila kebanyakan diterima via pilihan 2</li>
+</ul>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-1.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-2.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-3.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-4.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-5.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-6.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-7.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-8.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-9.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-10.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-11.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-12.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-13.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-14.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-15.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-16.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-17.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-18.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-19.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-20.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-21.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-22.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-23.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-24.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-25.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-26.png" title="" alt="" width="672" /></p>
+<pre><code>## ymax not defined: adjusting position using y instead</code></pre>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-6-27.png" title="" alt="" width="672" /></p>
 </div>
 
 
