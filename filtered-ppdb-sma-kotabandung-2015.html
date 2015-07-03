@@ -87,9 +87,9 @@ install.packages(&#39;RPostgreSQL&#39;)</code></pre>
 library(plyr)
 library(pander)
 library(ggplot2)
-library(scales)</code></pre>
-<pre class="r"><code>library(RPostgreSQL)
-con &lt;- dbConnect(dbDriver(&#39;PostgreSQL&#39;),
+library(scales)
+library(RPostgreSQL)</code></pre>
+<pre class="r"><code>con &lt;- dbConnect(dbDriver(&#39;PostgreSQL&#39;),
                  host=&#39;localhost&#39;, user=&#39;postgres&#39;, password=&#39;bippo&#39;,
                  dbname=&#39;scrape_scrape_dev&#39;)
 
@@ -99,8 +99,8 @@ con &lt;- dbConnect(dbDriver(&#39;PostgreSQL&#39;),
 #* 615 = SMA Negeri 4 Akademik
 #* 685 = SMA Negeri 18 Akademik
 #* 680 = SMA Negeri 17 Akademik
-#* 620 = SMA Negeri 17 Akademik
-#* 600 = SMA Negeri 17 Akademik
+#* 625 = SMA Negeri 6 Akademik
+#* 600 = SMA Negeri 1 Akademik
 
 plot_pg &lt;- function(option_id, name) {
   rs &lt;- dbSendQuery(con, paste(&quot;
@@ -139,38 +139,49 @@ plot_pg &lt;- function(option_id, name) {
   &quot;));
   df &lt;- fetch(rs, n=-1)
   df &lt;- df[!is.na(df$pg_dw),]
-  plot &lt;- ggplot(df, aes(x=snapshottime, y=pg_dw)) +
+  plot &lt;- ggplot(df, aes(x=snapshottime)) +
     scale_y_continuous(name=&#39;Nilai UN&#39;, limits=c(190, 400), breaks=seq(150, 400, by=10)) +
     scale_x_datetime(name=&#39;hijau=dalam wilayah | biru=luar wilayah | merah=luar kota&#39;) +
-    geom_errorbar(position=position_jitter(height=0), color=&#39;#00aa00&#39;,
-                 aes(ymin=low_dw, ymax=high_dw)) +
+    
     geom_line(aes(y=pg_dw), color=&#39;#00aa00&#39;, size=1.5, alpha=0.7, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_dw), color=&#39;#00aa00&#39;, linetype=&#39;dashed&#39;) +
-    geom_errorbar(position=position_jitter(height=0), color=&#39;#1111ee&#39;,
-                 aes(ymin=low_lw, ymax=high_lw)) +
+    geom_line(aes(y=median_dw), color=&#39;#00aa00&#39;, linetype=&#39;dotted&#39;) +
+    geom_linerange(position=position_jitter(height = 0), color=&#39;#00aa00&#39;, size=0.2,
+                 aes(y=median_dw, ymin=pg_dw, ymax=max_dw)) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;#00aa00&#39;, size=1,
+                 aes(y=median_dw, ymin=low_dw, ymax=high_dw)) +
+    geom_point(position=position_jitter(height = 0), color=&#39;#00aa00&#39;, size=4, alpha=0.5,
+                 aes(y=median_dw)) +
+    
     geom_line(aes(y=pg_lw), color=&#39;#1111ee&#39;, size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_lw), color=&#39;#1111ee&#39;, linetype=&#39;dashed&#39;) +
-    geom_errorbar(position=position_jitter(height=0), color=&#39;red&#39;,
-                 aes(ymin=low_lk, ymax=high_lk)) +
+    geom_line(aes(y=median_lw), color=&#39;#1111ee&#39;, linetype=&#39;dotted&#39;) +
+    geom_linerange(position=position_jitter(height = 0), color=&#39;#1111ee&#39;, size=0.2,
+                 aes(y=median_lw, ymin=pg_lw, ymax=max_lw)) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;#1111ee&#39;,
+                 aes(y=median_lw, ymin=low_lw, ymax=high_lw)) +
+    geom_point(position=position_jitter(height = 0), color=&#39;#1111ee&#39;, size=4, alpha=0.5,
+                 aes(y=median_lw)) +
+
     geom_line(aes(y=pg_lk), color=&#39;red&#39;, size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_lk), color=&#39;red&#39;, linetype=&#39;dashed&#39;) +
+    geom_line(aes(y=median_lk), color=&#39;red&#39;, linetype=&#39;dotted&#39;) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;red&#39;,
+                 aes(y=median_lk, ymin=low_lk, ymax=high_lk)) +
+    geom_errorbar(position=position_jitter(height=0), color=&#39;red&#39;,
+                 aes(y=median_lk, ymin=low_lk, ymax=high_lk)) +
+    geom_point(position=position_jitter(height = 0), color=&#39;red&#39;, size=4, alpha=0.5,
+                 aes(y=median_lk)) +
+
     ggtitle(paste(&#39;Passing Grade Kewilayahan&#39;, name))
   return(plot)
-}
-
-plot_pg(615, &#39;SMA Negeri 4 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>plot_pg(685, &#39;SMA Negeri 18 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-2.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>plot_pg(680, &#39;SMA Negeri 17 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-3.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>plot_pg(620, &#39;SMA Negeri 6 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-4.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>plot_pg(600, &#39;SMA Negeri 1 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-5.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>plot_pg(610, &#39;SMA Negeri 3 Bandung Akademik&#39;)</code></pre>
-<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-3-6.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>invisible(dbDisconnect(con))</code></pre>
+}</code></pre>
+<p>Grafik di bawah menampilkan:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Batas atas:</strong> maksimum nilai UN sesuai kewilayahan</li>
+<li><strong>Batas bawah:</strong> minimum/passing grade nilai UN sesuai kewilayahan</li>
+<li><strong>Point:</strong> median</li>
+<li><strong>Error bar atas:</strong> quartile 1 (top 25%)</li>
+<li><strong>Error bar bawah:</strong> quartile 3 (top 75%)</li>
+</ol>
+<p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-7.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-8.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-9.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-10.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-11.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-12.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-13.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-14.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-15.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-16.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-17.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-18.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-19.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-20.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-21.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-22.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-23.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-24.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-25.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-26.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-27.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-28.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-29.png" title="" alt="" width="672" /></p>
 </div>
 
 

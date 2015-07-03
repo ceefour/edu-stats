@@ -32,10 +32,10 @@ library(plyr)
 library(pander)
 library(ggplot2)
 library(scales)
+library(RPostgreSQL)
 ```
 
 ```{r message=FALSE, warning=FALSE}
-library(RPostgreSQL)
 con <- dbConnect(dbDriver('PostgreSQL'),
                  host='localhost', user='postgres', password='bippo',
                  dbname='scrape_scrape_dev')
@@ -46,8 +46,8 @@ con <- dbConnect(dbDriver('PostgreSQL'),
 #* 615 = SMA Negeri 4 Akademik
 #* 685 = SMA Negeri 18 Akademik
 #* 680 = SMA Negeri 17 Akademik
-#* 620 = SMA Negeri 17 Akademik
-#* 600 = SMA Negeri 17 Akademik
+#* 625 = SMA Negeri 6 Akademik
+#* 600 = SMA Negeri 1 Akademik
 
 plot_pg <- function(option_id, name) {
   rs <- dbSendQuery(con, paste("
@@ -86,31 +86,82 @@ plot_pg <- function(option_id, name) {
   "));
   df <- fetch(rs, n=-1)
   df <- df[!is.na(df$pg_dw),]
-  plot <- ggplot(df, aes(x=snapshottime, y=pg_dw)) +
+  plot <- ggplot(df, aes(x=snapshottime)) +
     scale_y_continuous(name='Nilai UN', limits=c(190, 400), breaks=seq(150, 400, by=10)) +
     scale_x_datetime(name='hijau=dalam wilayah | biru=luar wilayah | merah=luar kota') +
-    geom_errorbar(position=position_jitter(height=0), color='#00aa00',
-                 aes(ymin=low_dw, ymax=high_dw)) +
+    
     geom_line(aes(y=pg_dw), color='#00aa00', size=1.5, alpha=0.7, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_dw), color='#00aa00', linetype='dashed') +
-    geom_errorbar(position=position_jitter(height=0), color='#1111ee',
-                 aes(ymin=low_lw, ymax=high_lw)) +
+    geom_line(aes(y=median_dw), color='#00aa00', linetype='dotted') +
+    geom_linerange(position=position_jitter(height = 0), color='#00aa00', size=0.2,
+                 aes(y=median_dw, ymin=pg_dw, ymax=max_dw)) +
+    geom_errorbar(position=position_jitter(height=0), color='#00aa00', size=1,
+                 aes(y=median_dw, ymin=low_dw, ymax=high_dw)) +
+    geom_point(position=position_jitter(height = 0), color='#00aa00', size=4, alpha=0.5,
+                 aes(y=median_dw)) +
+    
     geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_lw), color='#1111ee', linetype='dashed') +
-    geom_errorbar(position=position_jitter(height=0), color='red',
-                 aes(ymin=low_lk, ymax=high_lk)) +
+    geom_line(aes(y=median_lw), color='#1111ee', linetype='dotted') +
+    geom_linerange(position=position_jitter(height = 0), color='#1111ee', size=0.2,
+                 aes(y=median_lw, ymin=pg_lw, ymax=max_lw)) +
+    geom_errorbar(position=position_jitter(height=0), color='#1111ee',
+                 aes(y=median_lw, ymin=low_lw, ymax=high_lw)) +
+    geom_point(position=position_jitter(height = 0), color='#1111ee', size=4, alpha=0.5,
+                 aes(y=median_lw)) +
+
     geom_line(aes(y=pg_lk), color='red', size=1.5, alpha=0.4, position=position_jitter(height=1)) +
-    geom_line(aes(y=median_lk), color='red', linetype='dashed') +
+    geom_line(aes(y=median_lk), color='red', linetype='dotted') +
+    geom_errorbar(position=position_jitter(height=0), color='red',
+                 aes(y=median_lk, ymin=low_lk, ymax=high_lk)) +
+    geom_errorbar(position=position_jitter(height=0), color='red',
+                 aes(y=median_lk, ymin=low_lk, ymax=high_lk)) +
+    geom_point(position=position_jitter(height = 0), color='red', size=4, alpha=0.5,
+                 aes(y=median_lk)) +
+
     ggtitle(paste('Passing Grade Kewilayahan', name))
   return(plot)
 }
+```
 
-plot_pg(615, 'SMA Negeri 4 Bandung Akademik')
-plot_pg(685, 'SMA Negeri 18 Bandung Akademik')
-plot_pg(680, 'SMA Negeri 17 Bandung Akademik')
-plot_pg(620, 'SMA Negeri 6 Bandung Akademik')
+Grafik di bawah menampilkan:
+
+1. **Batas atas:** maksimum nilai UN sesuai kewilayahan
+2. **Batas bawah:** minimum/passing grade nilai UN sesuai kewilayahan
+3. **Point:** median
+4. **Error bar atas:** quartile 1 (top 25%)
+5. **Error bar bawah:** quartile 3 (top 75%)
+
+```{r echo=FALSE, warning=FALSE}
 plot_pg(600, 'SMA Negeri 1 Bandung Akademik')
+plot_pg(605, 'SMA Negeri 2 Bandung Akademik')
 plot_pg(610, 'SMA Negeri 3 Bandung Akademik')
+plot_pg(615, 'SMA Negeri 4 Bandung Akademik')
+plot_pg(620, 'SMA Negeri 5 Bandung Akademik')
+plot_pg(625, 'SMA Negeri 6 Bandung Akademik')
+plot_pg(630, 'SMA Negeri 7 Bandung Akademik')
+plot_pg(635, 'SMA Negeri 8 Bandung Akademik')
+plot_pg(640, 'SMA Negeri 9 Bandung Akademik')
+plot_pg(645, 'SMA Negeri 10 Bandung Akademik')
+plot_pg(650, 'SMA Negeri 11 Bandung Akademik')
+plot_pg(655, 'SMA Negeri 12 Bandung Akademik')
+plot_pg(660, 'SMA Negeri 13 Bandung Akademik')
+plot_pg(665, 'SMA Negeri 14 Bandung Akademik')
+plot_pg(670, 'SMA Negeri 15 Bandung Akademik')
+plot_pg(675, 'SMA Negeri 16 Bandung Akademik')
+plot_pg(680, 'SMA Negeri 17 Bandung Akademik')
+plot_pg(685, 'SMA Negeri 18 Bandung Akademik')
+plot_pg(690, 'SMA Negeri 19 Bandung Akademik')
+plot_pg(695, 'SMA Negeri 20 Bandung Akademik')
+plot_pg(700, 'SMA Negeri 21 Bandung Akademik')
+plot_pg(705, 'SMA Negeri 22 Bandung Akademik')
+plot_pg(710, 'SMA Negeri 23 Bandung Akademik')
+plot_pg(715, 'SMA Negeri 24 Bandung Akademik')
+plot_pg(720, 'SMA Negeri 25 Bandung Akademik')
+plot_pg(725, 'SMA Negeri 26 Bandung Akademik')
+plot_pg(730, 'SMA Negeri 27 Bandung Akademik')
+plot_pg(735, 'MA Negeri 1 Bandung Akademik')
+plot_pg(740, 'MA Negeri 2 Bandung Akademik')
+```
 
+```{r echo=FALSE}
 invisible(dbDisconnect(con))
 ```
