@@ -160,6 +160,7 @@ plot_pg(725, 'SMA Negeri 26 Bandung Akademik')
 plot_pg(730, 'SMA Negeri 27 Bandung Akademik')
 plot_pg(735, 'MA Negeri 1 Bandung Akademik')
 plot_pg(740, 'MA Negeri 2 Bandung Akademik')
+#plot_pg(325, 'SMP Negeri 1 Bandung Akademik')
 ```
 
 ```{r message=FALSE, warning=FALSE}
