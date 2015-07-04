@@ -11,6 +11,8 @@ output:
 
 Hendy's note: `~/Dropbox/Hendy_Projects/soluvas-scrape/sample/ppdb`
 
+Backups: `/data/project_netadm/soluvas-scrape/ppdbkotabandung2015`
+
 ## Requirements
 
 ```
