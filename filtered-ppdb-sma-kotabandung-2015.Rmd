@@ -99,7 +99,7 @@ plot_pg <- function(option_id, name) {
     geom_point(position=position_jitter(height = 0), color='#00aa00', size=4, alpha=0.5,
                  aes(y=median_dw)) +
     
-    geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4)) + # PG
+    geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4) + # PG
     geom_line(aes(y=median_lw), color='#1111ee', linetype='dotted') +
     geom_linerange(position=position_jitter(height = 0), color='#1111ee', size=0.2,
                  aes(y=median_lw, ymin=pg_lw, ymax=max_lw)) +
@@ -210,7 +210,7 @@ plot_applicant <- function(option_id, name) {
     scale_y_continuous(name='Jumlah Pendaftar/Diterima') +
     scale_x_datetime(name='hijau=dalam wilayah | biru=luar wilayah | merah=luar kota') +
     geom_area(aes(y=filteredcount), position='stack', alpha=0.5) +
-    geom_line(aes(y=registeredcount, color=area), size=2, position=position_stack()) +
+    geom_line(aes(y=registeredcount, ymax=registeredcount, color=area), size=2, position=position_stack()) +
     ggtitle(paste('Jumlah Pendaftar vs Diterima Kewilayahan', name))
   plot
   return(plot)
