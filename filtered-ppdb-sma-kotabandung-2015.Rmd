@@ -90,7 +90,7 @@ plot_pg <- function(option_id, name) {
     scale_y_continuous(name='Nilai UN', limits=c(190, 400), breaks=seq(150, 400, by=10)) +
     scale_x_datetime(name='hijau=dalam wilayah | biru=luar wilayah | merah=luar kota') +
     
-    geom_line(aes(y=pg_dw), color='#00aa00', size=1.5, alpha=0.7, position=position_jitter(height=0.5)) +
+    geom_line(aes(y=pg_dw), color='#00aa00', size=1.5, alpha=0.7) + # PG
     geom_line(aes(y=median_dw), color='#00aa00', linetype='dotted') +
     geom_linerange(position=position_jitter(height = 0), color='#00aa00', size=0.2,
                  aes(y=median_dw, ymin=pg_dw, ymax=max_dw)) +
@@ -99,7 +99,7 @@ plot_pg <- function(option_id, name) {
     geom_point(position=position_jitter(height = 0), color='#00aa00', size=4, alpha=0.5,
                  aes(y=median_dw)) +
     
-    geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4, position=position_jitter(height=0.5)) +
+    geom_line(aes(y=pg_lw), color='#1111ee', size=1.5, alpha=0.4)) + # PG
     geom_line(aes(y=median_lw), color='#1111ee', linetype='dotted') +
     geom_linerange(position=position_jitter(height = 0), color='#1111ee', size=0.2,
                  aes(y=median_lw, ymin=pg_lw, ymax=max_lw)) +
@@ -108,7 +108,7 @@ plot_pg <- function(option_id, name) {
     geom_point(position=position_jitter(height = 0), color='#1111ee', size=4, alpha=0.5,
                  aes(y=median_lw)) +
 
-    geom_line(aes(y=pg_lk), color='red', size=1.5, alpha=0.4, position=position_jitter(height=0.5)) +
+    geom_line(aes(y=pg_lk), color='red', size=1.5, alpha=0.4) + # PG
     geom_line(aes(y=median_lk), color='red', linetype='dotted') +
     geom_errorbar(position=position_jitter(height=0), color='red',
                  aes(y=median_lk, ymin=low_lk, ymax=high_lk)) +
@@ -240,7 +240,7 @@ plot_applicant(660, 'SMA Negeri 13 Bandung Akademik')
 plot_applicant(665, 'SMA Negeri 14 Bandung Akademik')
 plot_applicant(670, 'SMA Negeri 15 Bandung Akademik')
 plot_applicant(675, 'SMA Negeri 16 Bandung Akademik')
-#plot_applicant(680, 'SMA Negeri 17 Bandung Akademik')# Error in matrix(value, n, p) :   'data' must be of a vector type, was 'NULL'
+plot_applicant(680, 'SMA Negeri 17 Bandung Akademik')# Error in matrix(value, n, p) :   'data' must be of a vector type, was 'NULL'
 plot_applicant(685, 'SMA Negeri 18 Bandung Akademik')
 plot_applicant(690, 'SMA Negeri 19 Bandung Akademik')
 plot_applicant(695, 'SMA Negeri 20 Bandung Akademik')
@@ -252,7 +252,7 @@ plot_applicant(720, 'SMA Negeri 25 Bandung Akademik')
 plot_applicant(725, 'SMA Negeri 26 Bandung Akademik')
 plot_applicant(730, 'SMA Negeri 27 Bandung Akademik')
 plot_applicant(735, 'MA Negeri 1 Bandung Akademik')
-# plot_applicant(740, 'MA Negeri 2 Bandung Akademik') Error in matrix(value, n, p) :   'data' must be of a vector type, was 'NULL'
+plot_applicant(740, 'MA Negeri 2 Bandung Akademik') # Error in matrix(value, n, p) :   'data' must be of a vector type, was 'NULL'
 ```
 
 ```{r echo=FALSE}
