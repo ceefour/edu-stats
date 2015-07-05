@@ -90,7 +90,7 @@ plot_pg <- function(option_id, name) {
   df <- df[!is.na(df$pg_dw),]
   plot <- ggplot(df, aes(x=snapshottime)) +
     scale_y_continuous(name='Nilai UN', limits=c(190, 400), breaks=seq(150, 400, by=10)) +
-    scale_x_datetime(name='hijau=dalam wilayah | biru=luar wilayah | merah=luar kota') +
+    scale_x_datetime(name='hijau=DW(T1) | biru=DW(T2) & LW | merah=luar kota') +
     
     geom_line(aes(y=pg_dw), color='#00aa00', size=1.5, alpha=0.7) + # PG
     geom_line(aes(y=median_dw), color='#00aa00', linetype='dotted') +
@@ -167,7 +167,7 @@ plot_pg(740, 'MA Negeri 2 Bandung Akademik')
 
 ```{r message=FALSE, warning=FALSE}
 filterstatuses <- c('registered', 'filtered')
-areas <- c('1-LK', '2-DW', '3-LW')
+areas <- c('1-LK', '2-DW(T1)', '3-DW(T2) & LW')
 plot_applicant <- function(option_id, name) {
   rs <- dbSendQuery(con, paste("
   -- SMA4, SMA18, SMA17, SMA6
@@ -198,10 +198,10 @@ plot_applicant <- function(option_id, name) {
     if (df[i,][['area']] == '1-LK') {
       df[i,'registeredcount'] <- df[i,]$daftar_lk
       df[i,'filteredcount'] <- df[i,]$terima_lk
-    } else if (df[i,][['area']] == '3-LW') {
+    } else if (df[i,][['area']] == '3-DW(T2) & LW') {
       df[i,'registeredcount'] <- df[i,]$daftar_lw
       df[i,'filteredcount'] <- df[i,]$terima_lw
-    } else if (df[i,][['area']] == '2-DW') {
+    } else if (df[i,][['area']] == '2-DW(T1)') {
       df[i,'registeredcount'] <- df[i,]$daftar_dw
       df[i,'filteredcount'] <- df[i,]$terima_dw
     }
@@ -210,7 +210,7 @@ plot_applicant <- function(option_id, name) {
   #df <- df[with(df, order(area, filterstatus, snapshottime)),]
   plot <- ggplot(df, aes(x=snapshottime, y=filteredcount, fill=area, group=area)) +
     scale_y_continuous(name='Jumlah Pendaftar/Diterima') +
-    scale_x_datetime(name='hijau=dalam wilayah | biru=luar wilayah | merah=luar kota') +
+    scale_x_datetime(name='hijau=DW(T1) | biru=DW(T2) & LW | merah=luar kota') +
     geom_area(aes(y=filteredcount), position='stack', alpha=0.5) +
     geom_line(aes(y=registeredcount, ymax=registeredcount, color=area), size=2, position=position_stack()) +
     ggtitle(paste('Jumlah Pendaftar vs Diterima Kewilayahan', name))

@@ -142,7 +142,7 @@ plot_pg &lt;- function(option_id, name) {
   df &lt;- df[!is.na(df$pg_dw),]
   plot &lt;- ggplot(df, aes(x=snapshottime)) +
     scale_y_continuous(name=&#39;Nilai UN&#39;, limits=c(190, 400), breaks=seq(150, 400, by=10)) +
-    scale_x_datetime(name=&#39;hijau=dalam wilayah | biru=luar wilayah | merah=luar kota&#39;) +
+    scale_x_datetime(name=&#39;hijau=DW(T1) | biru=DW(T2) &amp; LW | merah=luar kota&#39;) +
     
     geom_line(aes(y=pg_dw), color=&#39;#00aa00&#39;, size=1.5, alpha=0.7) + # PG
     geom_line(aes(y=median_dw), color=&#39;#00aa00&#39;, linetype=&#39;dotted&#39;) +
@@ -184,7 +184,7 @@ plot_pg &lt;- function(option_id, name) {
 </ol>
 <p><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-1.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-2.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-3.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-4.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-5.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-6.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-7.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-8.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-9.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-10.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-11.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-12.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-13.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-14.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-15.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-16.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-17.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-18.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-19.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-20.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-21.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-22.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-23.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-24.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-25.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-26.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-27.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-28.png" title="" alt="" width="672" /><img src="filtered-ppdb-sma-kotabandung-2015_files/figure-html/unnamed-chunk-4-29.png" title="" alt="" width="672" /></p>
 <pre class="r"><code>filterstatuses &lt;- c(&#39;registered&#39;, &#39;filtered&#39;)
-areas &lt;- c(&#39;1-LK&#39;, &#39;2-DW&#39;, &#39;3-LW&#39;)
+areas &lt;- c(&#39;1-LK&#39;, &#39;2-DW(T1)&#39;, &#39;3-DW(T2) &amp; LW&#39;)
 plot_applicant &lt;- function(option_id, name) {
   rs &lt;- dbSendQuery(con, paste(&quot;
   -- SMA4, SMA18, SMA17, SMA6
@@ -215,10 +215,10 @@ plot_applicant &lt;- function(option_id, name) {
     if (df[i,][[&#39;area&#39;]] == &#39;1-LK&#39;) {
       df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_lk
       df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_lk
-    } else if (df[i,][[&#39;area&#39;]] == &#39;3-LW&#39;) {
+    } else if (df[i,][[&#39;area&#39;]] == &#39;3-DW(T2) &amp; LW&#39;) {
       df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_lw
       df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_lw
-    } else if (df[i,][[&#39;area&#39;]] == &#39;2-DW&#39;) {
+    } else if (df[i,][[&#39;area&#39;]] == &#39;2-DW(T1)&#39;) {
       df[i,&#39;registeredcount&#39;] &lt;- df[i,]$daftar_dw
       df[i,&#39;filteredcount&#39;] &lt;- df[i,]$terima_dw
     }
@@ -227,7 +227,7 @@ plot_applicant &lt;- function(option_id, name) {
   #df &lt;- df[with(df, order(area, filterstatus, snapshottime)),]
   plot &lt;- ggplot(df, aes(x=snapshottime, y=filteredcount, fill=area, group=area)) +
     scale_y_continuous(name=&#39;Jumlah Pendaftar/Diterima&#39;) +
-    scale_x_datetime(name=&#39;hijau=dalam wilayah | biru=luar wilayah | merah=luar kota&#39;) +
+    scale_x_datetime(name=&#39;hijau=DW(T1) | biru=DW(T2) &amp; LW | merah=luar kota&#39;) +
     geom_area(aes(y=filteredcount), position=&#39;stack&#39;, alpha=0.5) +
     geom_line(aes(y=registeredcount, ymax=registeredcount, color=area), size=2, position=position_stack()) +
     ggtitle(paste(&#39;Jumlah Pendaftar vs Diterima Kewilayahan&#39;, name))
