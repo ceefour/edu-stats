@@ -18,8 +18,8 @@ Backups: `/data/project_netadm/soluvas-scrape/ppdbkotabandung2015`
 
 **Public/aggregate dataset:**
 
-1. [Data Sekolah SMA/MA Negeri Kota Bandung 2015](school.xlsx)
-2. [Histori Penerimaan & Statistik Passing Grade SMA/MA Negeri Kota Bandung, 5-10 Juli 2015](optionapplicantsnapshot_curated_2015-07-10.xlsx)
+1. [Data Sekolah SMA/MA Negeri Kota Bandung 2015 (Excel)](school.xlsx)
+2. [Histori Hasil Seleksi & Statistik Passing Grade PPDB SMA/MA Negeri Kota Bandung, 5-10 Juli 2015 (Excel)](optionapplicantsnapshot_curated_2015-07-10.xlsx)
 
 ## Requirements
 
