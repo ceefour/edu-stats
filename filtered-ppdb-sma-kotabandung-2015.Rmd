@@ -9,9 +9,17 @@ output:
 
 ## Data Pendaftar dan Hasil Seleksi Murid Diterima PPDB SMA/MA Negeri Kota Bandung 2015
 
-Hendy's note: `~/Dropbox/Hendy_Projects/soluvas-scrape/sample/ppdb`
+Hendy's notes:
+
+1. `~/Dropbox/Hendy_Projects/soluvas-scrape/sample/ppdb`
+2. `~/Dropbox/.../cozy/edu`
 
 Backups: `/data/project_netadm/soluvas-scrape/ppdbkotabandung2015`
+
+**Public/aggregate dataset:**
+
+1. [Data Sekolah SMA/MA Negeri Kota Bandung 2015](school.xlsx)
+2. [Histori Penerimaan & Statistik Passing Grade SMA/MA Negeri Kota Bandung, 5-10 Juli 2015](optionapplicantsnapshot_curated_2015-07-10.xlsx)
 
 ## Requirements
 
